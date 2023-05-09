@@ -1,26 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect} from 'react';
 import './App.css';
+import Tabs from "./components/Tabs";
+import {api} from "./app/api/api";
+import {useAppDispatch, useAppSelector} from "./app/hooks";
+import {initModels} from "./helpers/dispatchers";
+import Dialog from "./components/Dialog";
+import Notification from "./components/Notification";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const dispatch = useAppDispatch();
+    const { data } = api.useGetModelsQuery();
+    const currentModel = useAppSelector(state => state.app.currentModel);
+
+    useEffect(() => {
+        data && initModels(dispatch, data);
+    }, [data, dispatch]);
+
+    return (
+        <div style={{height: '100vh', maxHeight: '100vh'}}>
+            {currentModel && <Tabs/>}
+            <Dialog/>
+            <Notification/>
+            {/*<Modal/>*/}
+        </div>
+    );
 }
 
 export default App;

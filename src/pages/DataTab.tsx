@@ -6,6 +6,7 @@ import List from "../components/list/List";
 import DataForm from "../components/data/DataForm";
 import Box from "@mui/material/Box";
 import {OneObjectResponseType} from "../types/api";
+import {showNotification} from "../helpers/dispatchers";
 
 const DataTab = () => {
     const dispatch = useAppDispatch();
@@ -13,8 +14,15 @@ const DataTab = () => {
     const currentModel = useAppSelector(state => state.app.currentModel);
     const objects = useAppSelector(state => state.tabData.objects);
 
-    const { data: dataScheme } = api.useGetSchemesQuery({modelName: currentModel as string});
-    const { data: dataAllObjects } = api.useGetAllObjectsQuery({modelName: currentModel as string});
+    const {
+        data: dataScheme,
+        isError: isErrorScheme
+    } = api.useGetSchemesQuery({modelName: currentModel as string});
+
+    const {
+        data: dataAllObjects,
+        isError: isErrorAllObjects
+    } = api.useGetAllObjectsQuery({modelName: currentModel as string});
 
     useEffect(() => {
         dataScheme && dispatch(setFields(dataScheme));
@@ -27,6 +35,14 @@ const DataTab = () => {
     useEffect(() => {
         dataAllObjects && dispatch(setObjects(dataAllObjects));
     }, [dataAllObjects, dispatch]);
+
+    if (isErrorScheme) {
+        showNotification(dispatch, 'Error while fetching data scheme', 'error');
+    }
+
+    if (isErrorAllObjects) {
+        showNotification(dispatch, 'Error while fetching data', 'error');
+    }
 
     return (
         <Box

@@ -16,7 +16,7 @@ const DataForm = (props: DataFormProps) => {
     const isChanged = useAppSelector(state => state.tabData.isChanged);
     const [changedObject, setChangedObject] = useState(currentObject);
 
-    const { data } = api.useGetOneObjectQuery(
+    const { data, isError } = api.useGetOneObjectQuery(
         {modelName: props.modelName, id: props.selectedItemId as string},
         {skip: props.selectedItemId === null || props.selectedItemId === 'will be generated'}
     );
@@ -82,6 +82,11 @@ const DataForm = (props: DataFormProps) => {
     }, [currentObject]);
 
     if (Object.keys(changedObject).length === 1) return null;
+
+    if (isError) {
+        showNotification(dispatch, 'Error while loading data', 'error');
+        return null;
+    }
 
     return (
         <Box

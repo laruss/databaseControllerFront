@@ -7,7 +7,7 @@ import React, {useEffect, useState} from "react";
 import {api} from "../../app/api/api";
 import {dataIsChanged} from "../../helpers/functions";
 import {setAsChanged} from "../../app/slices/tabDataSlice";
-import {showNotification} from "../../helpers/dispatchers";
+import {goToObject, showNotification} from "../../helpers/dispatchers";
 
 const DataForm = (props: DataFormProps) => {
     const dispatch = useAppDispatch();
@@ -27,7 +27,13 @@ const DataForm = (props: DataFormProps) => {
     const saveHandler = () => {
         if (!changedObject.id) return;
         if (changedObject.id !== 'will be generated') {
-            updateObject({modelName: props.modelName, id: changedObject.id, data: changedObject})
+            const dataToUpdate = Object.keys(changedObject).reduce((acc, key) => {
+                if (changedObject[key] !== currentObject[key]) {
+                    acc[key] = changedObject[key];
+                }
+                return acc;
+            }, {} as {[key:string]: any});
+            updateObject({modelName: props.modelName, id: changedObject.id, data: dataToUpdate})
                 .unwrap()
                 .then(() => {
                     showNotification(dispatch, 'Object was updated successfully', 'success');
@@ -37,11 +43,16 @@ const DataForm = (props: DataFormProps) => {
                     showNotification(dispatch, error.data.error || error.data, 'error');
                 });
         } else {
-            delete (changedObject as {[key:string]: any}).id;
-            createObject({modelName: props.modelName, data: changedObject})
+            const dataToCreate = Object.keys(changedObject).reduce((acc, key) => {
+                key !== 'id' && (acc[key] = changedObject[key]);
+                return acc;
+            }, {} as {[key:string]: any});
+            createObject({modelName: props.modelName, data: dataToCreate})
                 .unwrap()
-                .then(() => {
+                .then((newData) => {
+                    dispatch(setAsChanged(false));
                     showNotification(dispatch, 'Object was created successfully', 'success');
+                    newData.id && goToObject(newData.id as string, props.modelName);
                 })
                 .catch((error) => {
                     console.log(error);

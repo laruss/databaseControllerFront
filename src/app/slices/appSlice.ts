@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from "../store";
 import {AppState} from "../../types/redux";
-import {ModelsResponseType} from "../../types/api";
+import {api} from "../api/api";
 
 const initialState: AppState = {
     isLoaded: false,
@@ -29,9 +29,6 @@ export const appSlice = createSlice({
         setLoaded: (state, action: PayloadAction<boolean>) => {
             state.isLoaded = action.payload;
         },
-        setModels: (state, action: PayloadAction<ModelsResponseType>) => {
-            state.models = action.payload;
-        },
         setCurrentModel: (state, action: PayloadAction<string>) => {
             state.currentModel = action.payload;
         },
@@ -41,12 +38,20 @@ export const appSlice = createSlice({
         setNotification: (state, action: PayloadAction<AppState['notification']>) => {
             state.notification = action.payload;
         }
+    },
+    extraReducers: builder => {
+        builder.addMatcher(
+            api.endpoints.getModels.matchFulfilled,
+            (state, {payload}) => {
+                state.models = payload;
+                state.currentModel = Object.keys(payload)[0];
+            }
+        )
     }
 });
 
 export const {
     setLoaded,
-    setModels,
     setCurrentModel,
     setDialog,
     setNotification
@@ -55,3 +60,7 @@ export const {
 export const selectIsLoaded = (state: RootState) => state.app.isLoaded;
 
 export default appSlice.reducer;
+
+export const selectModels = (state: RootState) => state.app.models;
+
+export const selectCurrentModel = (state: RootState) => state.app.currentModel;

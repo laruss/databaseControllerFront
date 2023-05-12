@@ -1,9 +1,10 @@
 import {AllObjectsResponseType, ModelsResponseType, OneObjectResponseType, SchemeResponseType} from "./api";
+import {CurrentModelType} from "./common";
 
 export interface AppState {
     isLoaded: boolean;
     models: ModelsResponseType;
-    currentModel: string | null;
+    currentModel: CurrentModelType;
     dialog: {
         isOpen: boolean;
         title: string;

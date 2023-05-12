@@ -1,6 +1,7 @@
 import {TabDataState} from "../../types/redux";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {AllObjectsResponseType, OneObjectResponseType, SchemeResponseType} from "../../types/api";
+import { AllObjectsResponseType, OneObjectResponseType } from "../../types/api";
+import {api} from "../api/api";
 
 const initialState: TabDataState = {
     fields: {},
@@ -17,9 +18,6 @@ export const tabDataSlice = createSlice({
     name: 'tabData',
     initialState,
     reducers: {
-        setFields: (state, action: PayloadAction<SchemeResponseType>) => {
-            state.fields = action.payload;
-        },
         setObjects: (state, action: PayloadAction<AllObjectsResponseType>) => {
             state.objects.all = action.payload;
         },
@@ -39,11 +37,23 @@ export const tabDataSlice = createSlice({
         setAsChanged: (state, action: PayloadAction<boolean>) => {
             state.isChanged = action.payload;
         }
+    },
+    extraReducers: builder => {
+        builder.addMatcher(
+            api.endpoints.getSchemes.matchFulfilled,
+            (state, {payload}) => {
+                state.fields = payload;
+            }
+        ).addMatcher(
+            api.endpoints.getAllObjects.matchFulfilled,
+            (state, {payload}) => {
+                state.objects.all = payload;
+            }
+        )
     }
 });
 
 export const {
-    setFields,
     setObjects,
     setCurrentObject,
     setCurrentObjectId,
@@ -52,3 +62,5 @@ export const {
 } = tabDataSlice.actions;
 
 export default tabDataSlice.reducer;
+
+export const selectFields = (state: {tabData: TabDataState}) => state.tabData.fields;

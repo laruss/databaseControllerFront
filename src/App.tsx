@@ -1,24 +1,25 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import './App.css';
 import Tabs from "./components/Tabs";
 import {api} from "./app/api/api";
-import {useAppDispatch, useAppSelector} from "./app/hooks";
-import {initModels} from "./helpers/dispatchers";
+import {useAppSelector} from "./app/hooks";
 import Dialog from "./components/Dialog";
 import Notification from "./components/Notification";
+import useErrorHandler from "./helpers/useErrorHandler";
+import {selectCurrentModel} from "./app/slices/appSlice";
 
 function App() {
-    const dispatch = useAppDispatch();
-    const { data } = api.useGetModelsQuery();
-    const currentModel = useAppSelector(state => state.app.currentModel);
+    const { error } = api.useGetModelsQuery();
+    const currentModel = useAppSelector(selectCurrentModel);
 
-    useEffect(() => {
-        data && initModels(dispatch, data);
-    }, [data, dispatch]);
+    useErrorHandler({
+        error,
+        message: 'Error while fetching models',
+    });
 
     return (
         <div style={{height: '100vh', maxHeight: '100vh'}}>
-            {currentModel && <Tabs/>}
+            {currentModel && <Tabs currentModel={currentModel}/>}
             <Dialog/>
             <Notification/>
             {/*<Modal/>*/}

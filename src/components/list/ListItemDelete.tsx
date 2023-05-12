@@ -19,11 +19,11 @@ const ListItemDelete = (props: ListItemDeleteInterface) => {
             .unwrap()
             .then(() => {
                 currentObject.id === itemId && dispatch(setCurrentObjectId(null));
-                showNotification(dispatch, 'Object was deleted successfully', 'success');
+                showNotification('Object was deleted successfully', 'success');
             })
             .catch((error) => {
                 console.log(error);
-                showNotification(dispatch, error.data.error || error.data, 'error');
+                showNotification(error.data.error || error.data, 'error');
             });
     }
 

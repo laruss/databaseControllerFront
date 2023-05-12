@@ -1,17 +1,16 @@
-import {useAppDispatch} from "../app/hooks";
-import {setCurrentModel, setModels, setNotification} from "../app/slices/appSlice";
-import {AllObjectsResponseType, ModelsResponseType, SchemeResponseType} from "../types/api";
+import {setCurrentModel, setNotification} from "../app/slices/appSlice";
+import {AllObjectsResponseType, SchemeResponseType} from "../types/api";
 import {setCurrentObject, setCurrentObjectAsNew, setCurrentObjectId, setObjects} from "../app/slices/tabDataSlice";
 import {handleItemSwitch} from "./functions";
 import {store} from "../app/store";
 
-export const changeTab = (dispatch: ReturnType<typeof useAppDispatch>, tab: string) => {
+export const changeTab = (tab: string) => {
     const isChanged = store.getState().tabData.isChanged;
 
     const method = () => {
-        dispatch(setCurrentModel(tab));
-        dispatch(setCurrentObjectId(null));
-        dispatch(setCurrentObjectAsNew());
+        store.dispatch(setCurrentModel(tab));
+        store.dispatch(setCurrentObjectId(null));
+        store.dispatch(setCurrentObjectAsNew());
     };
 
     if (!isChanged) return method();
@@ -58,13 +57,8 @@ export const addNewObject = (dataScheme: SchemeResponseType, dataAllObjects: All
     handleItemSwitch(method);
 }
 
-export const initModels = (dispatch: ReturnType<typeof useAppDispatch>, data: ModelsResponseType) => {
-    dispatch(setModels(data));
-    dispatch(setCurrentModel(Object.keys(data)[0]));
-};
-
-export const showNotification = (dispatch: ReturnType<typeof useAppDispatch>, text: string, variant: 'success' | 'error' | 'warning' | 'info' = 'info') => {
-    dispatch(setNotification({
+export const showNotification = (text: string, variant: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    store.dispatch(setNotification({
         isOpen: true,
         text,
         variant

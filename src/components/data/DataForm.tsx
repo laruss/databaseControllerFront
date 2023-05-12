@@ -36,11 +36,11 @@ const DataForm = (props: DataFormProps) => {
             updateObject({modelName: props.modelName, id: changedObject.id, data: dataToUpdate})
                 .unwrap()
                 .then(() => {
-                    showNotification(dispatch, 'Object was updated successfully', 'success');
+                    showNotification('Object was updated successfully', 'success');
                 })
                 .catch((error) => {
                     console.log(error);
-                    showNotification(dispatch, error.data.error || error.data, 'error');
+                    showNotification(error.data.error || error.data, 'error');
                 });
         } else {
             const dataToCreate = Object.keys(changedObject).reduce((acc, key) => {
@@ -51,12 +51,12 @@ const DataForm = (props: DataFormProps) => {
                 .unwrap()
                 .then((newData) => {
                     dispatch(setAsChanged(false));
-                    showNotification(dispatch, 'Object was created successfully', 'success');
+                    showNotification('Object was created successfully', 'success');
                     newData.id && goToObject(newData.id as string, props.modelName);
                 })
                 .catch((error) => {
                     console.log(error);
-                    showNotification(dispatch, error.data.errors || error.data, 'error');
+                    showNotification(error.data.errors || error.data, 'error');
                 });
         }
     };
@@ -67,7 +67,7 @@ const DataForm = (props: DataFormProps) => {
 
     useEffect(() => {
         data && props.setCurrentObject(data);
-    }, [data]);
+    }, [data, props]);
 
     useEffect(() => {
         if (dataIsChanged(currentObject, changedObject)) {
@@ -84,7 +84,7 @@ const DataForm = (props: DataFormProps) => {
     if (Object.keys(changedObject).length === 1) return null;
 
     if (isError) {
-        showNotification(dispatch, 'Error while loading data', 'error');
+        showNotification('Error while loading data', 'error');
         return null;
     }
 

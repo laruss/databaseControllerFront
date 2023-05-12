@@ -4,20 +4,20 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {useAppSelector} from "../app/hooks";
 import {changeTab} from "../helpers/dispatchers";
 import DataTab from "../pages/DataTab";
+import {selectModels} from "../app/slices/appSlice";
+import {CurrentModelType} from "../types/common";
 
-/*
-  https://mui.com/material-ui/react-tabs/
- */
+interface TabsProps {
+    currentModel: CurrentModelType;
+}
 
-export default function Tabs() {
-    const dispatch = useAppDispatch();
-    const models = useAppSelector(state => state.app.models);
-    const currentModel = useAppSelector(state => state.app.currentModel);
+export default function Tabs({ currentModel }: TabsProps) {
+    const models = useAppSelector(selectModels);
 
-    const handleChange = (event: React.SyntheticEvent, newValue: string) => changeTab(dispatch, newValue);
+    const handleChange = (event: React.SyntheticEvent, newValue: string) => changeTab(newValue);
 
     return (
         <Box
@@ -34,8 +34,8 @@ export default function Tabs() {
                     </TabList>
                 </Box>
                 {
-                    currentModel && <TabPanel value={currentModel as string}>
-                        {currentModel && <DataTab/>}
+                    currentModel && <TabPanel value={currentModel}>
+                        { currentModel && <DataTab currentModel={currentModel}/> }
                     </TabPanel>
                 }
             </TabContext>

@@ -8,7 +8,7 @@ import {useAppSelector} from "../app/hooks";
 import {changeTab} from "../helpers/dispatchers";
 import DataTab from "../pages/DataTab";
 import {selectModels} from "../app/slices/appSlice";
-import {CurrentModelType} from "../types/common";
+import { CurrentModelType } from '../types/common';
 
 interface TabsProps {
     currentModel: CurrentModelType;

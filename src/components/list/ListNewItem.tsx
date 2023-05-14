@@ -4,6 +4,7 @@ import React from "react";
 import {css} from "@emotion/react";
 import {addNewObject} from "../../helpers/dispatchers";
 import {useAppSelector} from "../../app/hooks";
+import {selectFields, selectObjects} from "../../app/slices/tabDataSlice";
 
 const itemCSS = css`
   &.Mui-selected {
@@ -25,12 +26,12 @@ const itemCSS = css`
 `
 
 const ListNewItem = () => {
-    const dataScheme = useAppSelector(state => state.tabData.fields);
-    const objects = useAppSelector(state => state.tabData.objects);
+    const dataScheme = useAppSelector(selectFields);
+    const objects = useAppSelector(selectObjects);
 
     const handleClick = () => {
         addNewObject(dataScheme, objects.all);
-    }
+    };
 
     return (
         <ListItemMUI>

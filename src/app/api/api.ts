@@ -3,7 +3,7 @@ import {AllObjectsResponseType, ModelsResponseType, OneObjectResponseType, Schem
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({baseUrl: '/api'}),
-    tagTypes: ['Models', 'Scheme', 'Objects'],
+    tagTypes: ['Models', 'Scheme', 'Objects', 'OneObject'],
     endpoints: (builder) => ({
         getModels: builder.query<ModelsResponseType, void>({
             query: () => '/models',
@@ -15,11 +15,11 @@ export const api = createApi({
         }),
         getAllObjects: builder.query<AllObjectsResponseType, { modelName: string }>({
             query: ({ modelName }) => `/${modelName}`,
-            providesTags: ['Objects'],
+            providesTags: ['Objects']
         }),
         getOneObject: builder.query<OneObjectResponseType, { modelName: string, id: string }>({
             query: ({ modelName, id }) => `/${modelName}/${id}`,
-            providesTags: ['Objects'],
+            providesTags: ['OneObject'],
         }),
         updateObject: builder.mutation<OneObjectResponseType, { modelName: string, id: string, data: OneObjectResponseType }>({
             query: ({ modelName, id, data }) => ({
@@ -27,7 +27,7 @@ export const api = createApi({
                 method: 'PATCH',
                 body: data,
             }),
-            invalidatesTags: ['Objects'],
+            invalidatesTags: ['OneObject', 'Objects'],
         }),
         createObject: builder.mutation<OneObjectResponseType, { modelName: string, data: OneObjectResponseType }>({
             query: ({ modelName, data }) => ({
@@ -35,7 +35,7 @@ export const api = createApi({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['Objects'],
+            invalidatesTags: ['OneObject', 'Objects'],
         }),
         deleteObject: builder.mutation<OneObjectResponseType, { modelName: string, id: string }>({
             query: ({ modelName, id }) => ({

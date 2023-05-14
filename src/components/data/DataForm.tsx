@@ -6,68 +6,58 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import React, {useEffect, useState} from "react";
 import {api} from "../../app/api/api";
 import {dataIsChanged} from "../../helpers/functions";
-import {setAsChanged} from "../../app/slices/tabDataSlice";
+import {selectCurrentObject, selectIsChanged, setAsChanged} from "../../app/slices/tabDataSlice";
 import {goToObject, showNotification} from "../../helpers/dispatchers";
+import useErrorHandler from "../../helpers/useErrorHandler";
 
 const DataForm = (props: DataFormProps) => {
     const dispatch = useAppDispatch();
 
-    const currentObject = useAppSelector(state => state.tabData.objects.current);
-    const isChanged = useAppSelector(state => state.tabData.isChanged);
+    const currentObject = useAppSelector(selectCurrentObject);
+    const isChanged = useAppSelector(selectIsChanged);
     const [changedObject, setChangedObject] = useState(currentObject);
 
-    const { data, isError } = api.useGetOneObjectQuery(
-        {modelName: props.modelName, id: props.selectedItemId as string},
-        {skip: props.selectedItemId === null || props.selectedItemId === 'will be generated'}
+    const { error } = api.useGetOneObjectQuery(
+        { modelName: props.modelName, id: currentObject.id as string },
+        { skip: !currentObject.id }
     );
 
-    const [updateObject] = api.useUpdateObjectMutation();
-    const [createObject] = api.useCreateObjectMutation();
+    const [
+        updateObject,
+        {
+            error: errorUpdateObject,
+            data: dataUpdateObject
+        }] = api.useUpdateObjectMutation();
+
+    const [
+        createObject,
+        {
+            error: errorCreateObject,
+            data: dataCreateObject
+        }] = api.useCreateObjectMutation();
 
     const saveHandler = () => {
-        if (!changedObject.id) return;
-        if (changedObject.id !== 'will be generated') {
+        if (changedObject.id === null) return;
+        if (changedObject.id) {
             const dataToUpdate = Object.keys(changedObject).reduce((acc, key) => {
                 if (changedObject[key] !== currentObject[key]) {
                     acc[key] = changedObject[key];
                 }
                 return acc;
             }, {} as {[key:string]: any});
-            updateObject({modelName: props.modelName, id: changedObject.id, data: dataToUpdate})
-                .unwrap()
-                .then(() => {
-                    showNotification('Object was updated successfully', 'success');
-                })
-                .catch((error) => {
-                    console.log(error);
-                    showNotification(error.data.error || error.data, 'error');
-                });
+            updateObject({modelName: props.modelName, id: changedObject.id, data: dataToUpdate});
         } else {
             const dataToCreate = Object.keys(changedObject).reduce((acc, key) => {
                 key !== 'id' && (acc[key] = changedObject[key]);
                 return acc;
             }, {} as {[key:string]: any});
-            createObject({modelName: props.modelName, data: dataToCreate})
-                .unwrap()
-                .then((newData) => {
-                    dispatch(setAsChanged(false));
-                    showNotification('Object was created successfully', 'success');
-                    newData.id && goToObject(newData.id as string, props.modelName);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    showNotification(error.data.errors || error.data, 'error');
-                });
+            createObject({modelName: props.modelName, data: dataToCreate});
         }
     };
 
     const changeFieldHandler = (name: string, value: string | boolean) => {
         setChangedObject({...changedObject, [name]: value});
     };
-
-    useEffect(() => {
-        data && props.setCurrentObject(data);
-    }, [data, props]);
 
     useEffect(() => {
         if (dataIsChanged(currentObject, changedObject)) {
@@ -81,12 +71,36 @@ const DataForm = (props: DataFormProps) => {
         setChangedObject(currentObject);
     }, [currentObject]);
 
-    if (Object.keys(changedObject).length === 1) return null;
+    useErrorHandler({
+        error,
+        message: "Error while fetching data of current object"
+    });
 
-    if (isError) {
-        showNotification('Error while loading data', 'error');
-        return null;
-    }
+    useErrorHandler({
+        error: errorUpdateObject,
+        message: "Error while updating object"
+    });
+
+    useErrorHandler({
+        error: errorCreateObject,
+        message: "Error while creating object"
+    });
+
+    useEffect(() => {
+        if (dataUpdateObject) {
+            showNotification('Object updated', 'success');
+            goToObject(dataUpdateObject.id as string, props.modelName);
+        }
+    }, [dataUpdateObject, props.modelName]);
+
+    useEffect(() => {
+        if (dataCreateObject) {
+            showNotification('Object created', 'success');
+            goToObject(dataCreateObject.id as string, props.modelName);
+        }
+    }, [dataCreateObject, props.modelName]);
+
+    if (Object.keys(changedObject).length === 1) return null;
 
     return (
         <Box

@@ -8,7 +8,7 @@ const ObjectIdField = (props: DataFieldProps) => (
     <TextField
         label={props.name}
         disabled
-        value={props.value}
+        value={props.value || 'will be generated'}
     />
 );
 

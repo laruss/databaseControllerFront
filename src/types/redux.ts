@@ -1,10 +1,13 @@
-import {AllObjectsResponseType, ModelsResponseType, OneObjectResponseType, SchemeResponseType} from "./api";
-import {CurrentModelType} from "./common";
+import {
+    ModelsResponseType,
+    OneObjectResponseType,
+    SchemeResponseType
+} from "./api";
+import {CurrentModelType, ObjectIdType} from "./common";
 
 export interface AppState {
     isLoaded: boolean;
     models: ModelsResponseType;
-    currentModel: CurrentModelType;
     dialog: {
         isOpen: boolean;
         title: string;
@@ -18,14 +21,18 @@ export interface AppState {
         variant: 'success' | 'error' | 'warning' | 'info';
     }
 }
-
-export type ObjectIdType = string | null;
 export interface CurrentObjectInterface extends OneObjectResponseType {id: ObjectIdType}
 
-export interface TabDataState {
+export type AllObjectsType = {
+    id: ObjectIdType;
+    name: string;
+}[];
+
+export interface TabDataStateInterface {
+    model: CurrentModelType;
     fields: SchemeResponseType;
     objects: {
-        all: AllObjectsResponseType;
+        all: AllObjectsType;
         current: CurrentObjectInterface;
     };
     isChanged: boolean;

@@ -7,7 +7,6 @@ import {api} from "../api/api";
 const initialState: AppState = {
     isLoaded: false,
     models: {},
-    currentModel: null,
     dialog: {
         isOpen: false,
         title: '',
@@ -29,9 +28,6 @@ export const appSlice = createSlice({
         setLoaded: (state, action: PayloadAction<boolean>) => {
             state.isLoaded = action.payload;
         },
-        setCurrentModel: (state, action: PayloadAction<string>) => {
-            state.currentModel = action.payload;
-        },
         setDialog: (state, action: PayloadAction<AppState['dialog']>) => {
             state.dialog = action.payload;
         },
@@ -44,7 +40,6 @@ export const appSlice = createSlice({
             api.endpoints.getModels.matchFulfilled,
             (state, {payload}) => {
                 state.models = payload;
-                state.currentModel = Object.keys(payload)[0];
             }
         )
     }
@@ -52,7 +47,6 @@ export const appSlice = createSlice({
 
 export const {
     setLoaded,
-    setCurrentModel,
     setDialog,
     setNotification
 } = appSlice.actions;
@@ -62,5 +56,3 @@ export const selectIsLoaded = (state: RootState) => state.app.isLoaded;
 export default appSlice.reducer;
 
 export const selectModels = (state: RootState) => state.app.models;
-
-export const selectCurrentModel = (state: RootState) => state.app.currentModel;

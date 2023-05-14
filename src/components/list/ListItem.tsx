@@ -11,7 +11,7 @@ const ListItem = (props: ListItemInterface) => {
 
     const handleClick = () => {
         dispatch(setCurrentObjectId(props.itemId));
-    }
+    };
 
     return (
         <ListItemMUI>
@@ -22,7 +22,7 @@ const ListItem = (props: ListItemInterface) => {
                 {props.itemName}
             </ListItemButton>
             {
-                props.itemId !== 'will be generated' && (
+                props.itemId && (
                     <ListItemDelete
                         itemId={props.itemId}
                         modelName={props.modelName}

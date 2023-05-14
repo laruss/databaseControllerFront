@@ -1,20 +1,19 @@
 import {
-    AllObjectsResponseType,
     SchemeResponseType,
-    SchemeFieldsType, OneObjectResponseType
+    SchemeFieldsType
 } from "./api";
+import {AllObjectsType} from "./redux";
+import {ObjectIdType} from "./common";
 
 export interface ListProps {
-    items: AllObjectsResponseType;
-    selectedItemId: string | null;
+    items: AllObjectsType;
+    selectedItemId: ObjectIdType;
     modelName: string;
 }
 
 export interface DataFormProps {
     fields: SchemeResponseType;
-    selectedItemId: string;
     modelName: string;
-    setCurrentObject: (data: OneObjectResponseType) => void;
 }
 
 export interface DataFieldProps {
@@ -30,8 +29,8 @@ export interface ListItemDeleteInterface {
 }
 
 export interface ListItemInterface {
-    itemId: string;
+    itemId: ObjectIdType;
     itemName: string;
     modelName: string;
-    selectedItemId: string | null;
+    selectedItemId: ObjectIdType;
 }

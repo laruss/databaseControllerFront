@@ -8,7 +8,7 @@ const ObjectIdField = (props: DataFieldProps) => (
     <TextField
         label={props.name}
         disabled
-        value={props.value}
+        value={props.value || 'will be generated'}
     />
 );
 
@@ -51,14 +51,6 @@ const fields = {
 }
 
 
-const DataField = (props: DataFieldProps) => {
-    // useEffect(() => {
-    //     props.name === 'is_current' && console.log(props);
-    // }, [props]);
-
-    return (
-        fields[props.type.type](props)
-    )
-};
+const DataField = (props: DataFieldProps) => fields[props.type.type](props);
 
 export default DataField;

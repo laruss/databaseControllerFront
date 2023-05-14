@@ -24,3 +24,19 @@ export const handleItemSwitch = (anyFunction: () => void) => {
         onCancel: () => {}
     }));
 };
+
+export const getDataToUpdate = (currentObject: CurrentObjectInterface, changedObject: CurrentObjectInterface) => (
+    Object.keys(changedObject).reduce((acc, key) => {
+        if (changedObject[key] !== currentObject[key]) {
+            acc[key] = changedObject[key];
+        }
+        return acc;
+    }, {} as {[key:string]: any})
+);
+
+export const getDataToCreate = (changedObject: CurrentObjectInterface) => (
+    Object.keys(changedObject).reduce((acc, key) => {
+        key !== 'id' && (acc[key] = changedObject[key]);
+        return acc;
+    }, {} as {[key:string]: any})
+);

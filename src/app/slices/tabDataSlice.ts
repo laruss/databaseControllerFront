@@ -1,9 +1,11 @@
-import {TabDataState} from "../../types/redux";
+import {TabDataStateInterface} from "../../types/redux";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import { AllObjectsResponseType, OneObjectResponseType } from "../../types/api";
 import {api} from "../api/api";
+import {CurrentModelType, ObjectIdType} from "../../types/common";
 
-const initialState: TabDataState = {
+const initialState: TabDataStateInterface = {
+    model: null,
     fields: {},
     objects: {
         all: [],
@@ -18,6 +20,9 @@ export const tabDataSlice = createSlice({
     name: 'tabData',
     initialState,
     reducers: {
+        setModel: (state, action: PayloadAction<CurrentModelType>) => {
+            state.model = action.payload;
+        },
         setObjects: (state, action: PayloadAction<AllObjectsResponseType>) => {
             state.objects.all = action.payload;
         },
@@ -27,7 +32,7 @@ export const tabDataSlice = createSlice({
                 id: state.objects.current.id
             };
         },
-        setCurrentObjectId: (state, action: PayloadAction<string | null>) => {
+        setCurrentObjectId: (state, action: PayloadAction<ObjectIdType>) => {
             state.objects.current.id = action.payload;
         },
         setCurrentObjectAsNew: (state) => {
@@ -46,14 +51,42 @@ export const tabDataSlice = createSlice({
             }
         ).addMatcher(
             api.endpoints.getAllObjects.matchFulfilled,
+            (state, {payload, meta}) => {
+                if (meta.arg.originalArgs.modelName === state.model)
+                    state.objects.all = payload;
+            }
+        ).addMatcher(
+            api.endpoints.getOneObject.matchFulfilled,
             (state, {payload}) => {
-                state.objects.all = payload;
+                state.objects.current = {
+                    ...payload,
+                    id: state.objects.current.id
+                };
+            }
+        ).addMatcher(
+            api.endpoints.updateObject.matchFulfilled,
+            (state, {payload}) => {
+                state.objects.current = {
+                    ...payload,
+                    id: state.objects.current.id
+                };
+                state.isChanged = false;
+            }
+        ).addMatcher(
+            api.endpoints.createObject.matchFulfilled,
+            (state, {payload}) => {
+                state.objects.current = {
+                    ...payload,
+                    id: payload.id as string || undefined
+                };
+                state.isChanged = false;
             }
         )
     }
 });
 
 export const {
+    setModel,
     setObjects,
     setCurrentObject,
     setCurrentObjectId,
@@ -63,4 +96,12 @@ export const {
 
 export default tabDataSlice.reducer;
 
-export const selectFields = (state: {tabData: TabDataState}) => state.tabData.fields;
+export const selectModel = (state: {tabData: TabDataStateInterface}) => state.tabData.model;
+
+export const selectFields = (state: {tabData: TabDataStateInterface}) => state.tabData.fields;
+
+export const selectObjects = (state: {tabData: TabDataStateInterface}) => state.tabData.objects;
+
+export const selectCurrentObject = (state: {tabData: TabDataStateInterface}) => state.tabData.objects.current;
+
+export const selectIsChanged = (state: {tabData: TabDataStateInterface}) => state.tabData.isChanged;

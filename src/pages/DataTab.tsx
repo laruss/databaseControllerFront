@@ -1,11 +1,10 @@
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {useAppSelector} from "../app/hooks";
 import {api} from "../app/api/api";
 import React, {useEffect} from "react";
-import { selectFields, setCurrentObject } from "../app/slices/tabDataSlice";
+import {selectFields, selectObjects} from "../app/slices/tabDataSlice";
 import List from "../components/list/List";
 import DataForm from "../components/data/DataForm";
 import Box from "@mui/material/Box";
-import {OneObjectResponseType} from "../types/api";
 import {CurrentModelType} from "../types/common";
 import useErrorHandler from "../helpers/useErrorHandler";
 
@@ -15,17 +14,12 @@ interface DataTabProps {
 
 const DataTab = ({ currentModel }: DataTabProps) => {
     const fields = useAppSelector(selectFields);
-    const dispatch = useAppDispatch();
 
-    const objects = useAppSelector(state => state.tabData.objects);
+    const objects = useAppSelector(selectObjects);
 
     const [getSchemes, { error: errorScheme }] = api.useLazyGetSchemesQuery();
 
     const [getAllObjects, { error: errorAllObjects }] = api.useLazyGetAllObjectsQuery();
-
-    const handleFetchCurrentObject = (object: OneObjectResponseType) => {
-        dispatch(setCurrentObject(object));
-    };
 
     useErrorHandler({
         error: errorScheme,
@@ -56,12 +50,10 @@ const DataTab = ({ currentModel }: DataTabProps) => {
                 modelName={currentModel as string}
             />
             {
-                objects.current.id && fields && (
+                objects.current.id !== null && fields && (
                     <DataForm
                         fields={fields}
-                        selectedItemId={objects.current.id}
                         modelName={currentModel as string}
-                        setCurrentObject={handleFetchCurrentObject}
                     />
                 )
             }

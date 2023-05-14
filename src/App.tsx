@@ -5,12 +5,12 @@ import {api} from "./app/api/api";
 import {useAppSelector} from "./app/hooks";
 import Dialog from "./components/Dialog";
 import Notification from "./components/Notification";
+import {selectModel} from "./app/slices/tabDataSlice";
 import useErrorHandler from "./helpers/useErrorHandler";
-import {selectCurrentModel} from "./app/slices/appSlice";
 
 function App() {
     const { error } = api.useGetModelsQuery();
-    const currentModel = useAppSelector(selectCurrentModel);
+    const currentModel = useAppSelector(selectModel);
 
     useErrorHandler({
         error,
@@ -19,7 +19,7 @@ function App() {
 
     return (
         <div style={{height: '100vh', maxHeight: '100vh'}}>
-            {currentModel && <Tabs currentModel={currentModel}/>}
+            {<Tabs currentModel={currentModel}/>}
             <Dialog/>
             <Notification/>
             {/*<Modal/>*/}

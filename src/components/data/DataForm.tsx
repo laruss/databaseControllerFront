@@ -5,9 +5,9 @@ import Button from "@mui/material/Button";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import React, {useEffect, useState} from "react";
 import {api} from "../../app/api/api";
-import {dataIsChanged} from "../../helpers/functions";
+import {dataIsChanged, getDataToCreate, getDataToUpdate} from "../../helpers/functions";
 import {selectCurrentObject, selectIsChanged, setAsChanged} from "../../app/slices/tabDataSlice";
-import {goToObject, showNotification} from "../../helpers/dispatchers";
+import {showNotification} from "../../helpers/dispatchers";
 import useErrorHandler from "../../helpers/useErrorHandler";
 
 const DataForm = (props: DataFormProps) => {
@@ -17,7 +17,7 @@ const DataForm = (props: DataFormProps) => {
     const isChanged = useAppSelector(selectIsChanged);
     const [changedObject, setChangedObject] = useState(currentObject);
 
-    const { error } = api.useGetOneObjectQuery(
+    const { error, refetch } = api.useGetOneObjectQuery(
         { modelName: props.modelName, id: currentObject.id as string },
         { skip: !currentObject.id }
     );
@@ -38,20 +38,13 @@ const DataForm = (props: DataFormProps) => {
 
     const saveHandler = () => {
         if (changedObject.id === null) return;
+        let data;
         if (changedObject.id) {
-            const dataToUpdate = Object.keys(changedObject).reduce((acc, key) => {
-                if (changedObject[key] !== currentObject[key]) {
-                    acc[key] = changedObject[key];
-                }
-                return acc;
-            }, {} as {[key:string]: any});
-            updateObject({modelName: props.modelName, id: changedObject.id, data: dataToUpdate});
+            data = getDataToUpdate(currentObject, changedObject);
+            updateObject({ modelName: props.modelName, id: changedObject.id, data });
         } else {
-            const dataToCreate = Object.keys(changedObject).reduce((acc, key) => {
-                key !== 'id' && (acc[key] = changedObject[key]);
-                return acc;
-            }, {} as {[key:string]: any});
-            createObject({modelName: props.modelName, data: dataToCreate});
+            data = getDataToCreate(changedObject);
+            createObject({modelName: props.modelName, data});
         }
     };
 
@@ -67,38 +60,23 @@ const DataForm = (props: DataFormProps) => {
         }
     }, [changedObject, currentObject, dispatch]);
 
-    useEffect(() => {
-        setChangedObject(currentObject);
-    }, [currentObject]);
+    useEffect(() => setChangedObject(currentObject), [currentObject]);
 
-    useErrorHandler({
-        error,
-        message: "Error while fetching data of current object"
-    });
+    useErrorHandler({ error, message: "Error while fetching data of current object" });
 
-    useErrorHandler({
-        error: errorUpdateObject,
-        message: "Error while updating object"
-    });
+    useErrorHandler({ error: errorUpdateObject, message: "Error while updating object" });
 
-    useErrorHandler({
-        error: errorCreateObject,
-        message: "Error while creating object"
-    });
+    useErrorHandler({ error: errorCreateObject, message: "Error while creating object" });
 
     useEffect(() => {
-        if (dataUpdateObject) {
-            showNotification('Object updated', 'success');
-            goToObject(dataUpdateObject.id as string, props.modelName);
-        }
+        dataUpdateObject && showNotification('Object updated', 'success');
     }, [dataUpdateObject, props.modelName]);
 
     useEffect(() => {
-        if (dataCreateObject) {
-            showNotification('Object created', 'success');
-            goToObject(dataCreateObject.id as string, props.modelName);
-        }
+        dataCreateObject && showNotification('Object created', 'success');
     }, [dataCreateObject, props.modelName]);
+
+    useEffect(() => { currentObject.id && refetch() }, [currentObject.id, refetch]);
 
     if (Object.keys(changedObject).length === 1) return null;
 
